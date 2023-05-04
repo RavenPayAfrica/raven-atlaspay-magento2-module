@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="script-src">
+            <values>
+                <value id="devdocs-base" type="host"></value>
+                <value id="atlasravenpay" type="host">https://integrations.getravenbank.com/v1/webpay/create_payment</value>
+                <value id="atlasravenpay" type="host">https://unpkg.com/atlas-pay-sdk@2.0.0/index.min.js</value>
+            </values>
+        </policy>
+            <!-- <policy id="frame-src">
+                <values>
+                   <value id="atlasravenpay" type="host">https://elaborate-blancmange-d0d15d.netlify.app/?ref=202304261451BIHCHEB</value>
+                  <frame-src>
+                <value id="atlasravenpay" type="host">https://elaborate-blancmange-d0d15d.netlify.app/?ref=202304261451BIHCHEB</value>
+                  <frame-src>
+                </values>
+        </policy> -->
+
+        <policy id="connect-src">
+            <values>
+                <value id="atlasravenpay" type="host">https://unpkg.com/atlas-pay-sdk@2.0.0/index.min.js</value>
+            </values>
+        </policy>
+
+         <policy id="connect-src">
+            <values>
+              <value id="atlasravenpay" type="host">https://integrations.getravenbank.com/v1/webpay/create_payment</value>
+            </values>
+        </policy>
+
+        <policy id="frame-src">
+            <values>
+                <value id="atlasravenpay" type="host">https://integrations.getravenbank.com/v1/webpay/create_payment</value>
+                <value id="atlasravenpay" type="host">https://elaborate-blancmange-d0d15d.netlify.app/</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

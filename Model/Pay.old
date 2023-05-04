@@ -1,0 +1,163 @@
+<?php
+/**
+ * AtlasPay Magento2 Module using \Magento\Payment\Model\Method\AbstractMethod
+ * Copyright (C) 2019 AtlasPay.com
+ *
+ * This file is part of Raven/AtlasPay.
+ *
+ * Raven/AtlasPay is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+namespace Raven\AtlasPay\Model;
+
+use Exception;
+use Magento\Payment\Helper\Data as PaymentHelper;
+use Raven\AtlasPay\Model\Payment\AtlasPay as PaystackModel;
+use Magento\Quote\Model\QuoteRepository as QuoteRepository;
+use Magento\Sales\Api\OrderRepositoryInterface;
+
+class PaymentManagement implements \Raven\AtlasPay\Api\PaymentManagementInterface
+{
+
+    protected $atlaspayPaymentInstance;
+
+    protected $atlaspayLib;
+    protected $orderRepository;
+    protected $orderFactory;
+
+    protected $orderInterface;
+    protected $checkoutSession;
+    protected $quoteRepository;
+
+    /**
+     * @var \Magento\Framework\Event\Manager
+     */
+    private $eventManager;
+
+    public function __construct(
+        PaymentHelper $paymentHelper,
+        QuoteRepository $quoteRepository,
+        \Magento\Framework\Event\Manager $eventManager,
+        \Magento\Sales\Api\Data\OrderInterface $orderInterface,
+        \Magento\Checkout\Model\Session $checkoutSession,
+        OrderRepositoryInterface $orderRepository,
+        \Magento\Sales\Model\OrderFactory $orderFactory
+
+
+    ) {
+        $this->eventManager = $eventManager;
+        $this->atlaspayPaymentInstance = $paymentHelper->getMethodInstance(PaystackModel::CODE);
+        $this->quoteRepository = $quoteRepository;
+        $this->orderRepository = $orderRepository;
+        $this->orderInterface = $orderInterface;
+        $this->checkoutSession = $checkoutSession;
+        $this->orderFactory = $orderFactory;
+
+    }
+
+    /**
+     * @param int $incrementId
+     * @return array
+     */
+    public function getOrderByIncrementId($id)
+{
+    $orderIncrementId = $id;
+    $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
+
+    return $order;
+}
+
+    /**
+     * @param string $reference
+     * @return bool
+     */
+    public function verifyPayment($reference)
+    {
+
+        // we are appending quoteid
+        $ref = explode('_-~-_', $reference);
+        $reference = $ref[0];
+        $quoteId = $ref[0];
+
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $incrId = '000000029';
+        $collection = $objectManager->create('Magento\Sales\Model\Order');
+        $orderInfo = $collection->loadByIncrementId($incrId);
+        $orderId = $orderInfo ->getId();
+        $checkoutSession = $objectManager->create('\Magento\Checkout\Model\Session');
+        $lastOrderId = $checkoutSession->getLastRealOrderId();
+        try {
+
+
+            $order = $this->getOrderByIncrementId(000000027);
+            //return json_encode($transaction_details);
+            if ($order && $order->getQuoteId() === $quoteId) {
+
+                // dispatch the `atlaspay_payment_verify_after` event to update the order status
+                $this->eventManager->dispatch('atlaspay_payment_verify_after', [
+                    "atlaspay_order" => $order,
+                ]);
+
+                return json_encode($order);
+            }
+        } catch (Exception $e) {
+            return json_encode([
+                'status'=>0,
+                'message'=>$e->getMessage(),
+                "data"=>$this->checkoutSession
+
+            ]);
+        }
+        return json_encode([
+            'status'=>0,
+            'message'=>"quoteId doesn't match transaction",
+            "data"=>$checkoutSession
+        ]);
+    }
+
+    /**
+     * Loads the order based on the last real order
+     * @return boolean
+     */
+    private function getOrder()
+    {
+        $lastOrder = $this->checkoutSession->getLastRealOrder();
+        if (!$lastOrder) {
+            return false;
+        }
+
+        // get the quote ID from the last order
+        $quoteId = $lastOrder->getQuoteId();
+        if (!$quoteId) {
+            return false;
+        }
+
+        // get the quote object using the quote repository
+        try {
+            /** @var \Magento\Quote\Model\Quote $quote */
+            $quote = $this->quoteRepository->get($quoteId);
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+            return false;
+        }
+
+        // get the order object from the quote
+        try {
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+            return false;
+        }
+        $quote = $this->quoteRepository->get($quoteId);
+
+        return $order;
+    }
+}

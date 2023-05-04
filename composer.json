@@ -1,0 +1,24 @@
+{
+    "name": "raven/atlaspay-magento2-module",
+    "description": "Raven Atlaspay Magento2 Module using \\Magento\\Payment\\Model\\Method\\AbstractMethod",
+    "version": "2.4.1",
+    "type": "magento2-module",
+    "license": [
+        "MIT"
+    ],
+    "authors": [
+        {
+            "email": "emmanuel.ezeani@getravenbank.com",
+            "name": "Emmanuel Ezeani"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Raven\\AtlasPay\\": ""
+        }
+    }
+}

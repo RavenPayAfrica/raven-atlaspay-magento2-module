@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <!-- Verify Payment -->
+    <route url="/V1/atlaspay/verify/:reference" method="GET">
+        <service class="Raven\AtlasPay\Api\PaymentManagementInterface" method="verifyPayment"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+
+    <!-- Retrieve Secret Key -->
+       <route url="/V1/atlaspay/live-secret-key/" method="GET">
+        <service class="Raven\AtlasPay\Api\ConfigInterface" method="getSecretKeyArray"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+
+    <!-- Process Webhooks -->
+    <route url="/V1/webhook" method="POST">
+    <service class="Raven\AtlasPay\Api\WebhookInterface" method="execute"/>
+    <resources>
+        <resource ref="anonymous"/>
+    </resources>
+</route>
+
+
+
+</routes>
